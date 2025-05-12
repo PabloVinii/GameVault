@@ -13,7 +13,7 @@
             ],
             "django": true,
             "autoStartBrowser": false,
-            "program": "${workspaceFolder}\\manage.py"
+            "program": "${workspaceFolder}\\backend\\manage.py"
         },
         {
             "name": "Make Migrations",
@@ -24,7 +24,7 @@
             ],
             "django": true,
             "autoStartBrowser": false,
-            "program": "${workspaceFolder}\\manage.py"
+            "program": "${workspaceFolder}\\backend\\manage.py"
         },
         {
             "name": "Migrate",
@@ -35,7 +35,7 @@
             ],
             "django": true,
             "autoStartBrowser": false,
-            "program": "${workspaceFolder}\\manage.py"
+            "program": "${workspaceFolder}\\backend\\manage.py"
         },
     ]
 }
