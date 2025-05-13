@@ -1,38 +1,41 @@
 import { useEffect, useState } from 'react';
 import api from '../api/api';
+import AddGameForm from '../components/AddGameForm';
 
 export default function Dashboard() {
   const [games, setGames] = useState([]);
 
-  useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const res = await api.get('games/');
-        setGames(res.data);
-      } catch (err) {
-        alert('Erro ao buscar jogos. Verifique se você está logado.');
-        console.error(err);
-      }
-    };
+  const fetchGames = async () => {
+    try {
+      const res = await api.get('usergames/');
+      setGames(res.data);
+    } catch (err) {
+      alert('Erro ao buscar jogos');
+    }
+  };
 
+  useEffect(() => {
     fetchGames();
   }, []);
 
   return (
     <div>
       <h2>Meus Jogos</h2>
-      {games.length === 0 ? (
-        <p>Nenhum jogo adicionado ainda.</p>
-      ) : (
-        <ul>
-          {games.map((game) => (
-            <li key={game.id}>
-              <strong>{game.title}</strong> - {game.platform} - {game.status}
-              {game.rating && <> - Nota: {game.rating}/10</>}
-            </li>
-          ))}
-        </ul>
-      )}
+      <AddGameForm onGameAdded={fetchGames} />
+      <ul>
+        {games.map((ug) => (
+          <li key={ug.id} style={{ marginBottom: '1rem' }}>
+            <img src={ug.game.cover_url} alt={ug.game.title} width={100} />
+            <div>
+              <strong>{ug.game.title}</strong>
+              <p>Status: {ug.status}</p>
+              <p>Nota: {ug.rating || '—'}</p>
+              <p>Comentário: {ug.review || '—'}</p>
+              <small>{ug.game.genre} - {ug.game.platform}</small>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

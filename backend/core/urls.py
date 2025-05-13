@@ -1,8 +1,11 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path
-from .views import GameViewSet
+from .views import GameViewSet, AddGameToUserView, UserGameViewSet
 
 router = DefaultRouter()
 router.register(r'games', GameViewSet, basename='games')
+router.register(r'usergames', UserGameViewSet, basename='usergames')
 
-urlpatterns = router.urls
+urlpatterns = router.urls + [
+    path('add-game/', AddGameToUserView.as_view(), name='add-game'),
+]
