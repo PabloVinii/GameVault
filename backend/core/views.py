@@ -1,4 +1,5 @@
 from rest_framework import viewsets, permissions
+from django.core.cache import cache
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Game, UserGame
@@ -81,3 +82,35 @@ class AddGameToUserView(APIView):
 
         serializer = UserGameSerializer(user_game)
         return Response(serializer.data, status=201)
+
+
+class DiscoverGamesView(APIView):
+    def get(self, request):
+        cache_key = 'discover_games'
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            return Response(cached_data)
+
+        API_KEY = os.getenv('RAWG_API_KEY')
+        url = f"https://api.rawg.io/api/games?key={API_KEY}&ordering=-rating&page_size=20"
+        res = requests.get(url)
+
+        if res.status_code != 200:
+            return Response({'error': 'Erro ao buscar jogos na RAWG'}, status=500)
+
+        data = res.json().get('results', [])
+        jogos = [
+            {
+                'rawg_id': game['id'],
+                'title': game['name'],
+                'cover_url': game['background_image'],
+                'rating': game['rating'],
+                'genre': game['genres'][0]['name'] if game['genres'] else '',
+                'platform': game['platforms'][0]['platform']['name'] if game['platforms'] else ''
+            }
+            for game in data
+        ]
+
+        cache.set(cache_key, jogos, timeout=60 * 10)  # 10 minutos de cache
+        return Response(jogos)
