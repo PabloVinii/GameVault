@@ -86,31 +86,78 @@ class AddGameToUserView(APIView):
 
 class DiscoverGamesView(APIView):
     def get(self, request):
-        cache_key = 'discover_games'
+        term   = request.query_params.get('search', '').strip()
+        genre  = request.query_params.get('genre', '').lower()
+        order  = request.query_params.get('ordering', '-rating')
+        page   = int(request.query_params.get('page', 1))
+        page_size = int(request.query_params.get('page_size', 20))
+
+        cache_key = f'discover_{term}_{genre}_{order}_{page}'
+        cached = cache.get(cache_key)
+        if cached:
+            return Response(cached)
+
+        params = {
+            'key': os.getenv('RAWG_API_KEY'),
+            'page_size': page_size,
+            'page': page,
+            'ordering': order,
+        }
+        if term:
+            params['search'] = term
+        if genre:
+            params['genres'] = genre 
+
+        res = requests.get('https://api.rawg.io/api/games', params=params)
+        if res.status_code != 200:
+            return Response({'error': 'RAWG error'}, status=502)
+
+        data = res.json()
+        results = [{
+            'rawg_id': g['id'],
+            'title':   g['name'],
+            'cover_url': g['background_image'],
+            'rating': g['rating'],
+            'genre':  g['genres'][0]['name'] if g['genres'] else '',
+            'platform': g['platforms'][0]['platform']['name'] if g['platforms'] else ''
+        } for g in data['results']]
+
+        payload = {
+            'results': results,
+            'count':   data.get('count', 0),
+            'page':    page,
+            'page_size': page_size,
+        }
+        cache.set(cache_key, payload, 60*10)
+        return Response(payload)
+
+
+    
+class GameInfoView(APIView):
+    def get(self, request, rawg_id):
+        cache_key = f'game_info_{rawg_id}'
         cached_data = cache.get(cache_key)
 
         if cached_data:
             return Response(cached_data)
 
         API_KEY = os.getenv('RAWG_API_KEY')
-        url = f"https://api.rawg.io/api/games?key={API_KEY}&ordering=-rating&page_size=20"
+        url = f'https://api.rawg.io/api/games/{rawg_id}?key={API_KEY}'
         res = requests.get(url)
 
         if res.status_code != 200:
-            return Response({'error': 'Erro ao buscar jogos na RAWG'}, status=500)
+            return Response({'error': 'Jogo não encontrado na RAWG'}, status=404)
 
-        data = res.json().get('results', [])
-        jogos = [
-            {
-                'rawg_id': game['id'],
-                'title': game['name'],
-                'cover_url': game['background_image'],
-                'rating': game['rating'],
-                'genre': game['genres'][0]['name'] if game['genres'] else '',
-                'platform': game['platforms'][0]['platform']['name'] if game['platforms'] else ''
-            }
-            for game in data
-        ]
+        data = res.json()
+        game_data = {
+            'rawg_id': data['id'],
+            'title': data['name'],
+            'cover_url': data.get('background_image'),
+            'rating': data.get('rating'),
+            'genre': data['genres'][0]['name'] if data['genres'] else '',
+            'platform': data['platforms'][0]['platform']['name'] if data['platforms'] else '',
+            'description': data.get('description_raw', ''),
+        }
 
-        cache.set(cache_key, jogos, timeout=60 * 10)  # 10 minutos de cache
-        return Response(jogos)
+        cache.set(cache_key, game_data, timeout=60 * 60)  # 1 hora de cache
+        return Response(game_data)

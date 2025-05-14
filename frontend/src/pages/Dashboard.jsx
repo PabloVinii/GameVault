@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../api/api';
 import Navbar from '../components/Navbar';
 import GameCard from '../components/GameCard/GameCard';
+import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
   const [games, setGames] = useState([]);
@@ -36,12 +37,13 @@ export default function Dashboard() {
               gap: '1rem'
             }}>
               {games.map((ug) => (
-                <GameCard
-                  key={ug.id}
-                  game={ug.game}
-                  showReview={true}
-                  userGameData={ug}
-                />
+                <Link key={ug.id} to={`/game/${ug.game.rawg_id}`} style={{ textDecoration: 'none' }}>
+                  <GameCard
+                    game={ug.game}
+                    showReview={true}
+                    userGameData={ug}
+                  />
+                </Link>
               ))}
             </div>
           )}
