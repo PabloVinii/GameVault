@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaUser, FaLock } from 'react-icons/fa';
+import { FaSignInAlt } from 'react-icons/fa';
 import api from '../api/api';
 import './styles/Login.css';
 
@@ -24,21 +26,33 @@ export default function Login() {
     <div className="login-container">
       <form onSubmit={handleSubmit} className="login-form">
         <h2>Login</h2>
-        <input
-          type="text"
-          placeholder="Usuário"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Entrar</button>
+
+        <div className="input-group">
+          <FaUser className="icon" />
+          <input
+            type="text"
+            placeholder="Usuário"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="input-group">
+          <FaLock className="icon" />
+          <input
+            type="password"
+            placeholder="Senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+
+        <button type="submit">
+          <FaSignInAlt style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+          Entrar
+        </button>
       </form>
     </div>
   );
