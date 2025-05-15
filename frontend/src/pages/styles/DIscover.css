@@ -1,5 +1,7 @@
-/* Discover.css */
-.discover-wrapper { padding-top: 4rem; }
+
+.discover-wrapper {
+  padding-top: 80px;; 
+}
 
 .discover-content {
   display: grid;
@@ -13,56 +15,117 @@
 .discover-sidebar {
   background: var(--bg-alt);
   border-radius: var(--radius);
-  padding: 1rem;
+  padding: 1.25rem;
   height: fit-content;
 }
 
-.discover-sidebar h2 { text-align: center; margin: .5rem 0 1rem; }
-
-.discover-search input,
-.discover-search button,
-.filter-btn {
-  width: 100%;
-  border: none;
-  border-radius: var(--radius);
-  padding: .6rem;
-  font-size: .9rem;
-  margin-bottom: .5rem;
+.discover-sidebar h2 {
+  text-align: center;
+  margin: 0.5rem 0 1.2rem;
 }
 
-.discover-search input { background: #000; color: var(--text); }
-.btn-primary { background: var(--primary); }
-.btn-secondary { background: #555; }
+.discover-search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
 
-.filter-btn { background: #333; cursor: pointer; }
-.filter-btn.active { background: var(--primary); }
+.discover-search input {
+  padding: 0.6rem;
+  border-radius: var(--radius);
+  background: #000;
+  color: var(--text);
+  border: 1px solid #333;
+  font-size: 0.9rem;
+  width: 100%;
+}
 
-.discover-section { width: 100%; }
+.discover-search button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s ease;
+}
+.discover-search button:hover {
+  background: var(--primary-hover);
+}
+
+.filter-btn {
+  background: #333;
+  border: none;
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.6rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.filter-btn:hover {
+  background: var(--primary-hover);
+}
+
+.filter-btn.active {
+  background: var(--primary);
+  color: white;
+}
+
+.discover-section {
+  width: 100%;
+}
 
 .discover-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); /* cards maiores */
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 1.5rem;
 }
 
-/* paginação */
 .discover-pagination {
   display: flex;
   justify-content: center;
   gap: 1rem;
   margin: 2rem 0;
 }
+
 .discover-pagination button {
   background: #333;
-  padding: .5rem 1.3rem;
+  padding: 0.5rem 1.3rem;
   border: none;
   border-radius: var(--radius);
   cursor: pointer;
+  color: var(--text);
+  font-weight: 600;
 }
 
-/* 📱 sidebar vira menu recolhível em telas menores */
+.discover-pagination button:hover {
+  background: var(--primary-hover);
+}
+
 @media (max-width: 900px) {
-  .discover-content { grid-template-columns: 1fr; }
-  .discover-sidebar { position: fixed; left: -260px; top: 0; height: 100%; overflow-y: auto; transition: left .3s; }
-  .discover-sidebar.open { left: 0; }
+  .discover-content {
+    grid-template-columns: 1fr;
+  }
+
+  .discover-sidebar {
+    position: fixed;
+    top: 0;
+    left: -260px;
+    height: 100%;
+    overflow-y: auto;
+    background: var(--bg-alt);
+    z-index: 50;
+    transition: left 0.3s ease;
+  }
+
+  .discover-sidebar.open {
+    left: 0;
+  }
 }

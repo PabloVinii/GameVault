@@ -1,3 +1,9 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
   --bg: #1e1e1e;
   --bg-alt: #151515;
@@ -22,11 +28,11 @@ a:hover {
 
 html, body {
   margin: 0;
-  min-height: 100vh;
+  padding: 0;
   background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  height: 100%;
 }
+
 
 h1 {
   font-size: 3.2em;

@@ -1,15 +1,32 @@
-/* Navbar.css */
 .nav {
-  position: sticky;  /* sempre visível */
+  position: fixed;
   top: 0;
-  z-index: 20;
+  left: 0;
+  right: 0;
+  height: 56px;
+  z-index: 100;
+
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: .8rem 1.4rem;
+  justify-content: space-between;
+  padding: 0 1.4rem;
+
+  background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(6px);
-  background: rgba(0,0,0,.55);
   border-bottom: 1px solid #ffffff11;
+
+  animation: nav-fade-in 0.25s ease;
+}
+
+@keyframes nav-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .nav-links a {
@@ -17,17 +34,21 @@
   color: var(--text);
   text-decoration: none;
   font-weight: 600;
-  transition: color .2s;
+  transition: color 0.2s;
 }
-.nav-links a:hover { color: var(--primary); }
+.nav-links a:hover {
+  color: var(--primary);
+}
 
 .nav-btn {
   background: var(--bg-alt);
   border: 1px solid #ffffff22;
   color: var(--text);
-  padding: .45rem 1rem;
+  padding: 0.45rem 1rem;
   border-radius: var(--radius);
   cursor: pointer;
-  transition: background .2s;
+  transition: background 0.2s;
 }
-.nav-btn:hover { background: #000; }
+.nav-btn:hover {
+  background: #000;
+}
