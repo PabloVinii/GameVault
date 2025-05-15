@@ -165,6 +165,11 @@ class GameInfoView(APIView):
             'metacritic': data.get('metacritic'),
             'tags': data.get('tags', []),
             'screenshots': data.get('short_screenshots', []),
+            'ratings': data.get('ratings', []),
+            'developers': data.get('developers', []),
+            'publishers': data.get('publishers', []),
+            'website': data.get('website'),
+            'stores': data.get('stores', []),
         }
 
         cache.set(cache_key, game_data, timeout=60 * 60)  # 1 h

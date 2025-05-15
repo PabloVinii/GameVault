@@ -81,3 +81,31 @@
 .add-btn:hover { background:var(--primary-hover); }
 .already-added { margin-top:2rem; color:#22c55e; font-weight:700; }
 
+/* ratings breakdown */
+.rating-breakdown { margin:1.5rem 0; display:flex; flex-direction:column; gap:.4rem; }
+.rating-row { display:flex; align-items:center; gap:.5rem; }
+.r-title { text-transform:capitalize; width:120px; font-size:.85rem; }
+.r-bar { flex:1; height:8px; background:#333; border-radius:4px; overflow:hidden; }
+.r-bar > div { height:100%; background:var(--primary); }
+.r-percent { width:40px; font-size:.8rem; text-align:right; }
+
+/* store buttons */
+.stores-wrapper { margin:1.5rem 0; display:flex; flex-wrap:wrap; gap:.5rem; }
+.store-btn {
+  display:flex; align-items:center; gap:.35rem;
+  background:#2a2a2a; color:#fff; padding:.35rem .7rem; border-radius:6px;
+  font-size:.8rem; text-decoration:none; transition:background .2s;
+}
+.store-btn:hover { background:#3d3d3d; }
+.s-icon { font-size:1rem; }
+
+/* credits */
+.credits { margin:1rem 0; font-size:.85rem; line-height:1.4; }
+
+/* external btn */
+.external-btn {
+  display:inline-flex; align-items:center;
+  background:#444; color:#fff; padding:.5rem 1rem; border-radius:6px;
+  text-decoration:none; margin:1rem 0; transition:background .2s;
+}
+.external-btn:hover { background:#555; }
