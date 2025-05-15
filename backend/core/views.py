@@ -163,17 +163,21 @@ class GameInfoView(APIView):
         cache.set(cache_key, game_data, timeout=60 * 60)  # 1 hora de cache
         return Response(game_data)
     
-
 class RegisterView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
+        email    = request.data.get('email')
 
-        if not username or not password:
+        if not username or not password or not email:
             return Response({'error': 'Preencha todos os campos'}, status=400)
 
         if User.objects.filter(username=username).exists():
             return Response({'error': 'Usuário já existe'}, status=400)
 
-        User.objects.create_user(username=username, password=password)
+        if User.objects.filter(email=email).exists():
+            return Response({'error': 'Já existe uma conta com esse email'}, status=400)
+
+        User.objects.create_user(username=username, password=password, email=email)
+
         return Response({'message': 'Usuário criado com sucesso'}, status=201)
