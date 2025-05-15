@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../api/api';
 import Navbar from '../components/Navbar';
-import GameCard from '../components/GameCard/GameCard';
+import GameCard from '../components/GameCard';
 import { Link } from 'react-router-dom';
 
 export default function Dashboard() {

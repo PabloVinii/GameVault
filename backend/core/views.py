@@ -121,7 +121,7 @@ class DiscoverGamesView(APIView):
             'cover_url': g['background_image'],
             'rating': g['rating'],
             'genre':  g['genres'][0]['name'] if g['genres'] else '',
-            'platform': ", ".join([p['platform']['name'] for p in g['platforms']])  # 👈 trocado
+            'platform': ", ".join([p['platform']['name'] for p in g['platforms']]) if g.get('platforms') else ''
         } for g in data['results']]
 
         payload = {

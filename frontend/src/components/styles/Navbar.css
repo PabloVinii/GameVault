@@ -1,0 +1,33 @@
+/* Navbar.css */
+.nav {
+  position: sticky;  /* sempre visível */
+  top: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .8rem 1.4rem;
+  backdrop-filter: blur(6px);
+  background: rgba(0,0,0,.55);
+  border-bottom: 1px solid #ffffff11;
+}
+
+.nav-links a {
+  margin-right: 1rem;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--primary); }
+
+.nav-btn {
+  background: var(--bg-alt);
+  border: 1px solid #ffffff22;
+  color: var(--text);
+  padding: .45rem 1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background .2s;
+}
+.nav-btn:hover { background: #000; }

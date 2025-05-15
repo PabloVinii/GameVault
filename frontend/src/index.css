@@ -1,16 +1,14 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --bg: #1e1e1e;
+  --bg-alt: #151515;
+  --card-bg: #202020;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --accent: #ffce3d;
+  --success: #22c55e;
+  --text: #f3f3f3;
+  --muted: #a0a0a0;
+  --radius: 12px;
 }
 
 a {
@@ -22,10 +20,12 @@ a:hover {
   color: #535bf2;
 }
 
-body {
+html, body {
   margin: 0;
-  min-width: 320px;
   min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
 h1 {

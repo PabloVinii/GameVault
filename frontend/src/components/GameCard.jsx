@@ -1,6 +1,6 @@
 import { FaWindows, FaPlaystation, FaXbox, FaMobileAlt, FaApple } from 'react-icons/fa';
 import { SiNintendo, SiLinux } from 'react-icons/si';
-import './GameCard.css';
+import './styles/GameCard.css';
 
 const platformIconMap = {
   pc: <FaWindows title="PC" />,
@@ -14,10 +14,8 @@ const platformIconMap = {
 };
 
 export default function GameCard({ game, added = false, onAddClick, showReview = false, userGameData = {} }) {
-  // helper to pick icons based on platform string(s)
   const renderPlatformIcons = () => {
     if (!game.platform) return null;
-    // we may receive comma‑separated or single string
     const raw = Array.isArray(game.platform) ? game.platform : game.platform.split(',');
     return raw.map((p) => {
       const key = p.trim().toLowerCase();
@@ -41,9 +39,18 @@ export default function GameCard({ game, added = false, onAddClick, showReview =
           <span className="game-card-added">✓ Já adicionado</span>
         ) : (
           onAddClick && (
-            <button onClick={() => onAddClick(game.title)} className="game-card-button">+ Adicionar ao perfil</button>
+            <div className="game-card-button-wrapper">
+              <button
+                type="button"
+                className="game-card-button"
+                onClick={() => onAddClick(game.title)}
+              >
+                +
+              </button>
+            </div>
           )
         )}
+
 
         {showReview && userGameData.status && (
           <div className="game-card-review">
