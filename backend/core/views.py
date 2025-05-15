@@ -32,12 +32,13 @@ def get_or_create_game_by_name(game_name):
     data = response.json()
 
     if data['results']:
-        jogo_raw = data['results'][0]  
+        jogo_raw = data['results'][0]
         rawg_id = jogo_raw['id']
         title = jogo_raw['name']
         cover_url = jogo_raw['background_image'] or ''
         genre = jogo_raw['genres'][0]['name'] if jogo_raw['genres'] else ''
-        platform = jogo_raw['platforms'][0]['platform']['name'] if jogo_raw['platforms'] else ''
+        platforms_list = [p['platform']['name'] for p in jogo_raw['platforms']] if jogo_raw.get('platforms') else []
+        platform = ", ".join(platforms_list)
 
         game, created = Game.objects.get_or_create(
             rawg_id=rawg_id,
@@ -120,7 +121,7 @@ class DiscoverGamesView(APIView):
             'cover_url': g['background_image'],
             'rating': g['rating'],
             'genre':  g['genres'][0]['name'] if g['genres'] else '',
-            'platform': g['platforms'][0]['platform']['name'] if g['platforms'] else ''
+            'platform': ", ".join([p['platform']['name'] for p in g['platforms']])  # 👈 trocado
         } for g in data['results']]
 
         payload = {
@@ -156,7 +157,7 @@ class GameInfoView(APIView):
             'cover_url': data.get('background_image'),
             'rating': data.get('rating'),
             'genre': data['genres'][0]['name'] if data['genres'] else '',
-            'platform': data['platforms'][0]['platform']['name'] if data['platforms'] else '',
+            'platform': ", ".join([p['platform']['name'] for p in data['platforms']]),
             'description': data.get('description_raw', ''),
         }
 
