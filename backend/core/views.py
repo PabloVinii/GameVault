@@ -10,6 +10,13 @@ import os
 
 RAWG_API_KEY = os.getenv('RAWG_API_KEY')
 
+def join_unique_platforms(platform_objs):
+    """Recebe a lista de plataformas vinda da RAWG e devolve uma string
+    única (sem duplicatas) separada por vírgula, mantendo a ordem original."""
+    names = [p['platform']['name'] for p in platform_objs] if platform_objs else []
+    # dict.fromkeys() preserva a ordem de inserção e remove duplicatas
+    return ", ".join(dict.fromkeys(names))
+
 class GameViewSet(viewsets.ModelViewSet):
     serializer_class = GameSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -24,34 +31,32 @@ class UserGameViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return UserGame.objects.filter(user=self.request.user).select_related('game')
-    
 
 def get_or_create_game_by_name(game_name):
     url = f'https://api.rawg.io/api/games?search={game_name}&key={RAWG_API_KEY}'
     response = requests.get(url)
     data = response.json()
 
-    if data['results']:
-        jogo_raw = data['results'][0]
-        rawg_id = jogo_raw['id']
-        title = jogo_raw['name']
-        cover_url = jogo_raw['background_image'] or ''
-        genre = jogo_raw['genres'][0]['name'] if jogo_raw['genres'] else ''
-        platforms_list = [p['platform']['name'] for p in jogo_raw['platforms']] if jogo_raw.get('platforms') else []
-        platform = ", ".join(platforms_list)
-
-        game, created = Game.objects.get_or_create(
-            rawg_id=rawg_id,
-            defaults={
-                'title': title,
-                'cover_url': cover_url,
-                'genre': genre,
-                'platform': platform,
-            }
-        )
-        return game
-    else:
+    if not data.get('results'):
         return None
+
+    jogo_raw = data['results'][0]
+    rawg_id = jogo_raw['id']
+    title = jogo_raw['name']
+    cover_url = jogo_raw.get('background_image') or ''
+    genre = jogo_raw['genres'][0]['name'] if jogo_raw.get('genres') else ''
+    platform = join_unique_platforms(jogo_raw.get('platforms'))
+
+    game, _ = Game.objects.get_or_create(
+        rawg_id=rawg_id,
+        defaults={
+            'title': title,
+            'cover_url': cover_url,
+            'genre': genre,
+            'platform': platform,
+        }
+    )
+    return game
 
 class AddGameToUserView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -85,7 +90,6 @@ class AddGameToUserView(APIView):
         serializer = UserGameSerializer(user_game)
         return Response(serializer.data, status=201)
 
-
 class DiscoverGamesView(APIView):
     def get(self, request):
         term   = request.query_params.get('search', '').strip()
@@ -100,7 +104,7 @@ class DiscoverGamesView(APIView):
             return Response(cached)
 
         params = {
-            'key': os.getenv('RAWG_API_KEY'),
+            'key': RAWG_API_KEY,
             'page_size': page_size,
             'page': page,
             'ordering': order,
@@ -108,21 +112,24 @@ class DiscoverGamesView(APIView):
         if term:
             params['search'] = term
         if genre:
-            params['genres'] = genre 
+            params['genres'] = genre
 
         res = requests.get('https://api.rawg.io/api/games', params=params)
         if res.status_code != 200:
             return Response({'error': 'RAWG error'}, status=502)
 
         data = res.json()
-        results = [{
-            'rawg_id': g['id'],
-            'title':   g['name'],
-            'cover_url': g['background_image'],
-            'rating': g['rating'],
-            'genre':  g['genres'][0]['name'] if g['genres'] else '',
-            'platform': ", ".join([p['platform']['name'] for p in g['platforms']]) if g.get('platforms') else ''
-        } for g in data['results']]
+        results = [
+            {
+                'rawg_id': g['id'],
+                'title':   g['name'],
+                'cover_url': g.get('background_image'),
+                'rating': g.get('rating'),
+                'genre':  g['genres'][0]['name'] if g.get('genres') else '',
+                'platform': join_unique_platforms(g.get('platforms')),
+            }
+            for g in data.get('results', [])
+        ]
 
         payload = {
             'results': results,
@@ -130,23 +137,18 @@ class DiscoverGamesView(APIView):
             'page':    page,
             'page_size': page_size,
         }
-        cache.set(cache_key, payload, 60*10)
+        cache.set(cache_key, payload, 60 * 10)  # 10 min
         return Response(payload)
 
-
-    
 class GameInfoView(APIView):
     def get(self, request, rawg_id):
         cache_key = f'game_info_{rawg_id}'
         cached_data = cache.get(cache_key)
-
         if cached_data:
             return Response(cached_data)
 
-        API_KEY = os.getenv('RAWG_API_KEY')
-        url = f'https://api.rawg.io/api/games/{rawg_id}?key={API_KEY}'
+        url = f'https://api.rawg.io/api/games/{rawg_id}?key={RAWG_API_KEY}'
         res = requests.get(url)
-
         if res.status_code != 200:
             return Response({'error': 'Jogo não encontrado na RAWG'}, status=404)
 
@@ -156,14 +158,18 @@ class GameInfoView(APIView):
             'title': data['name'],
             'cover_url': data.get('background_image'),
             'rating': data.get('rating'),
-            'genre': data['genres'][0]['name'] if data['genres'] else '',
-            'platform': ", ".join([p['platform']['name'] for p in data['platforms']]),
+            'genre': data['genres'][0]['name'] if data.get('genres') else '',
+            'platform': join_unique_platforms(data.get('platforms')),
             'description': data.get('description_raw', ''),
+            'released': data.get('released'),
+            'metacritic': data.get('metacritic'),
+            'tags': data.get('tags', []),
+            'screenshots': data.get('short_screenshots', []),
         }
 
-        cache.set(cache_key, game_data, timeout=60 * 60)  # 1 hora de cache
+        cache.set(cache_key, game_data, timeout=60 * 60)  # 1 h
         return Response(game_data)
-    
+
 class RegisterView(APIView):
     def post(self, request):
         username = request.data.get('username')
@@ -180,5 +186,4 @@ class RegisterView(APIView):
             return Response({'error': 'Já existe uma conta com esse email'}, status=400)
 
         User.objects.create_user(username=username, password=password, email=email)
-
         return Response({'message': 'Usuário criado com sucesso'}, status=201)
