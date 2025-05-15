@@ -10,8 +10,23 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.2);
   z-index: 0;
+}
+
+.login-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  z-index: 0;
+  pointer-events: none;
 }
 
 .login-form {
@@ -29,7 +44,7 @@
   border-radius: 16px;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.5),
-    0 0 12px rgba(240, 185, 6, 0.2);
+    0 0 12px rgba(108, 99, 255, 0.2);
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -87,7 +102,6 @@
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
-
   background: #6c63ff;
   color: #fff;
   border: none;
@@ -96,10 +110,15 @@
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
-
   transition: background 0.2s ease, box-shadow 0.3s ease;
   box-shadow: 0 0 0 rgba(108, 99, 255, 0.2);
   animation: pulse 2.5s infinite;
+}
+
+.login-form button:hover {
+  background: #554fd8;
+  box-shadow: 0 0 12px rgba(108, 99, 255, 0.6),
+              0 0 24px rgba(108, 99, 255, 0.4);
 }
 
 @keyframes pulse {
@@ -110,10 +129,4 @@
     box-shadow: 0 0 12px rgba(108, 99, 255, 0.4),
                 0 0 20px rgba(108, 99, 255, 0.2);
   }
-}
-
-.login-form button:hover {
-  background: #554fd8;
-  box-shadow: 0 0 12px rgba(108, 99, 255, 0.6),
-              0 0 24px rgba(108, 99, 255, 0.4);
 }

@@ -1,4 +1,5 @@
 from rest_framework import viewsets, permissions
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -161,3 +162,18 @@ class GameInfoView(APIView):
 
         cache.set(cache_key, game_data, timeout=60 * 60)  # 1 hora de cache
         return Response(game_data)
+    
+
+class RegisterView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        if not username or not password:
+            return Response({'error': 'Preencha todos os campos'}, status=400)
+
+        if User.objects.filter(username=username).exists():
+            return Response({'error': 'Usuário já existe'}, status=400)
+
+        User.objects.create_user(username=username, password=password)
+        return Response({'message': 'Usuário criado com sucesso'}, status=201)

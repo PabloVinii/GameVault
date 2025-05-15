@@ -3,6 +3,7 @@ import Login from './pages/login';
 import Dashboard from './pages/Dashboard';
 import Discover from './pages/Discover';
 import GameDetail from './pages/GameDetail';
+import Register from './pages/Register';
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/discover" element={<Discover />} />
         <Route path="/game/:id" element={<GameDetail />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </BrowserRouter>
   );
