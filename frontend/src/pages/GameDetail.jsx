@@ -1,5 +1,6 @@
 // ... (imports e configs mantidos)
 import { useEffect, useState } from 'react';
+import { FaTimes } from 'react-icons/fa';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   FaWindows,
@@ -41,7 +42,9 @@ export default function GameDetail() {
   const [added, setAdded] = useState(false);
   const [suggestedGames, setSuggestedGames] = useState([]);
   const [achievements, setAchievements] = useState([]);
+  const [showAllAchievements, setShowAllAchievements] = useState(false);
 
+  
   const isLoggedIn = Boolean(localStorage.getItem('access'));
 
   useEffect(() => {
@@ -148,7 +151,35 @@ export default function GameDetail() {
             </div>
           ))}
         </div>
+        <button className="view-all-btn" onClick={() => setShowAllAchievements(true)}>
+          Ver todas as conquistas
+        </button>
       </section>
+    );
+  };
+
+  const renderAchievementsModal = () => {
+    if (!showAllAchievements) return null;
+    return (
+      <div className="achievements-modal">
+        <div className="modal-content">
+          <button className="close-modal" onClick={() => setShowAllAchievements(false)}>
+            <FaTimes />
+          </button>
+          <h2>🏆 Todas as Conquistas</h2>
+          <div className="modal-achievements-grid">
+            {achievements.map((a) => (
+              <div key={a.id} className="achievement-card">
+                <img src={a.image} alt={a.name} />
+                <div>
+                  <strong>{a.name}</strong>
+                  <p>{a.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -225,6 +256,7 @@ export default function GameDetail() {
         {renderStores()}
         {renderScreenshots()}
         {renderAchievements()}
+        {renderAchievementsModal()}
 
         {game.website && (
           <a href={game.website} target="_blank" rel="noreferrer" className="external-btn">

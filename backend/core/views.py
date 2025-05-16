@@ -237,22 +237,31 @@ class GameAchievementsView(APIView):
         if cached:
             return Response(cached)
 
-        url = f"https://api.rawg.io/api/games/{rawg_id}/achievements?key={RAWG_API_KEY}"
-        res = requests.get(url)
-        if res.status_code != 200:
-            return Response({'error': 'Conquistas não disponíveis'}, status=404)
+        url = f"https://api.rawg.io/api/games/{rawg_id}/achievements"
+        params = {"key": RAWG_API_KEY, "page_size": 40}
 
-        data = res.json()
-        achievements = [
-            {
-                'id': a['id'],
-                'name': a['name'],
-                'description': a.get('description', ''),
-                'image': a.get('image'),
-            }
-            for a in data.get('results', [])
-        ]
+        achievements = []
+        while url:
+            res = requests.get(url, params=params)
+            if res.status_code != 200:
+                return Response({"error": "Conquistas não disponíveis"}, status=404)
 
-        cache.set(cache_key, achievements, 60 * 60)
+            data = res.json()
+
+            achievements.extend(
+                {
+                    "id": a["id"],
+                    "name": a["name"],
+                    "description": a.get("description", ""),
+                    "image": a.get("image"),
+                }
+                for a in data.get("results", [])
+            )
+            
+            url = data.get("next")
+            params = None 
+
+        cache.set(cache_key, achievements, 60 * 60)  # 1 h
         return Response(achievements)
+
 
