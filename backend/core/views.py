@@ -229,3 +229,30 @@ class SuggestedGamesView(APIView):
         ][:4]
 
         return Response(results)
+    
+class GameAchievementsView(APIView):
+    def get(self, request, rawg_id):
+        cache_key = f"achievements_{rawg_id}"
+        cached = cache.get(cache_key)
+        if cached:
+            return Response(cached)
+
+        url = f"https://api.rawg.io/api/games/{rawg_id}/achievements?key={RAWG_API_KEY}"
+        res = requests.get(url)
+        if res.status_code != 200:
+            return Response({'error': 'Conquistas não disponíveis'}, status=404)
+
+        data = res.json()
+        achievements = [
+            {
+                'id': a['id'],
+                'name': a['name'],
+                'description': a.get('description', ''),
+                'image': a.get('image'),
+            }
+            for a in data.get('results', [])
+        ]
+
+        cache.set(cache_key, achievements, 60 * 60)
+        return Response(achievements)
+

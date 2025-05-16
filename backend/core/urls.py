@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path
-from .views import GameViewSet, AddGameToUserView, UserGameViewSet, DiscoverGamesView, GameInfoView, RegisterView, SuggestedGamesView
+from .views import GameViewSet, AddGameToUserView, UserGameViewSet, DiscoverGamesView, GameInfoView, RegisterView, SuggestedGamesView, GameAchievementsView
 
 router = DefaultRouter()
 router.register(r'games', GameViewSet, basename='games')
@@ -24,4 +24,8 @@ urlpatterns += [
 
 urlpatterns += [
     path('suggested-games/<int:rawg_id>/', SuggestedGamesView.as_view(), name='suggested-games'),
+]
+
+urlpatterns += [
+    path('game-achievements/<int:rawg_id>/', GameAchievementsView.as_view(), name='game-achievements'),
 ]
