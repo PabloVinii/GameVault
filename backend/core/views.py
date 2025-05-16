@@ -192,3 +192,40 @@ class RegisterView(APIView):
 
         User.objects.create_user(username=username, password=password, email=email)
         return Response({'message': 'Usuário criado com sucesso'}, status=201)
+
+class SuggestedGamesView(APIView):
+    def get(self, request, rawg_id):
+        API_KEY = os.getenv('RAWG_API_KEY')
+        url = f'https://api.rawg.io/api/games/{rawg_id}?key={API_KEY}'
+        res = requests.get(url)
+
+        if res.status_code != 200:
+            return Response({'error': 'Jogo não encontrado'}, status=404)
+
+        game = res.json()
+        tags = [t['slug'] for t in game.get('tags', [])][:2]
+        genre = game['genres'][0]['slug'] if game.get('genres') else ''
+
+        params = {
+            'key': API_KEY,
+            'page_size': 6,
+            'ordering': '-rating',
+            'exclude_additions': True,
+        }
+        if tags:
+            params['tags'] = ','.join(tags)
+        elif genre:
+            params['genres'] = genre
+
+        similar = requests.get('https://api.rawg.io/api/games', params=params).json()
+        results = [
+            {
+                'rawg_id': g['id'],
+                'title': g['name'],
+                'cover_url': g.get('background_image'),
+                'rating': g.get('rating'),
+            }
+            for g in similar.get('results', []) if g['id'] != int(rawg_id)
+        ][:4]
+
+        return Response(results)

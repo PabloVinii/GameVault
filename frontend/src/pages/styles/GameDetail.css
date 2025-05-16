@@ -109,3 +109,33 @@
   text-decoration:none; margin:1rem 0; transition:background .2s;
 }
 .external-btn:hover { background:#555; }
+
+.suggested-section {
+  margin-top: 3rem;
+}
+.suggested-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+.suggested-card {
+  background: #2a2a2a;
+  padding: .5rem;
+  border-radius: 6px;
+  text-align: center;
+  color: #fff;
+  transition: transform .2s;
+}
+.suggested-card:hover {
+  transform: scale(1.03);
+}
+.suggested-card img {
+  width: 100%;
+  border-radius: 4px;
+  object-fit: cover;
+}
+.suggested-card p {
+  font-size: .9rem;
+  font-weight: bold;
+  margin-top: .5rem;
+}

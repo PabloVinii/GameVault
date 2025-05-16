@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { FaWindows, FaPlaystation, FaXbox, FaMobileAlt, FaApple, FaExternalLinkAlt } from 'react-icons/fa';
 import { SiNintendo, SiLinux, SiSteam, SiEpicgames, SiGogdotcom } from 'react-icons/si';
 import Navbar from '../components/Navbar';
@@ -19,9 +19,9 @@ const platformIconMap = {
 };
 
 const storeIconMap = {
-  steam:      <SiSteam      />,  // store.steampowered.com
-  epic:       <SiEpicgames  />,  // epicgames.com
-  gog:        <SiGogdotcom  />,  // gog.com
+  steam: <SiSteam />,      // store.steampowered.com
+  epic:  <SiEpicgames />,  // epicgames.com
+  gog:   <SiGogdotcom />,  // gog.com
 };
 
 export default function GameDetail() {
@@ -29,6 +29,7 @@ export default function GameDetail() {
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
   const [added, setAdded] = useState(false);
+  const [suggestedGames, setSuggestedGames] = useState([]);
   const isLoggedIn = !!localStorage.getItem('access');
 
   useEffect(() => {
@@ -55,8 +56,18 @@ export default function GameDetail() {
       }
     };
 
+    const fetchSuggested = async () => {
+      try {
+        const { data } = await api.get(`suggested-games/${id}/`);
+        setSuggestedGames(data);
+      } catch (err) {
+        console.error('Erro ao buscar jogos sugeridos', err);
+      }
+    };
+
     fetchDetails();
     checkUserGames();
+    fetchSuggested();
   }, [id, isLoggedIn]);
 
   /* ------------------------------------ */
@@ -109,6 +120,24 @@ export default function GameDetail() {
     );
   };
 
+  const renderSuggested = () => {
+    if (!suggestedGames.length) return null;
+    return (
+      <div className="suggested-section">
+        <h3>Você pode gostar de…</h3>
+        <div className="suggested-grid">
+          {suggestedGames.map((g) => (
+            <Link key={g.rawg_id} to={`/game/${g.rawg_id}`} className="suggested-card">
+              <img src={g.cover_url} alt={g.title} />
+              <p>{g.title}</p>
+              <span>⭐ {g.rating}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   /* ------------------------------------ */
   if (loading) return <Spinner label="Carregando detalhes…" />;
   if (!game)    return <div className="game-detail-error">Jogo não encontrado.</div>;
@@ -131,46 +160,24 @@ export default function GameDetail() {
 
       {/* MAIN INFO */}
       <section className="game-info">
-        {/* Descrição */}
         {game.description && <p className="description">{game.description}</p>}
-
-        {/* Tag chips */}
         {game.tags?.length > 0 && (
           <div className="tags-wrapper">
-            {game.tags.slice(0, 15).map((t) => (
-              <span key={t.id} className="tag">{t.name}</span>
-            ))}
+            {game.tags.slice(0, 15).map((t) => (<span key={t.id} className="tag">{t.name}</span>))}
           </div>
         )}
-
-        {/* Ratings breakdown */}
         {renderRatingBars()}
-
-        {/* Stores */}
         {renderStores()}
-
-        {/* Dev / Pub */}
         <div className="credits">
-          {game.developers?.length > 0 && (
-            <p><strong>Desenvolvedora:</strong> {game.developers.map((d) => d.name).join(', ')}</p>
-          )}
-          {game.publishers?.length > 0 && (
-            <p><strong>Publicadora:</strong> {game.publishers.map((p) => p.name).join(', ')}</p>
-          )}
+          {game.developers?.length > 0 && (<p><strong>Desenvolvedora:</strong> {game.developers.map((d) => d.name).join(', ')}</p>)}
+          {game.publishers?.length > 0 && (<p><strong>Publicadora:</strong> {game.publishers.map((p) => p.name).join(', ')}</p>)}
         </div>
-
-        {/* Site oficial */}
         {game.website && (
-          <a href={game.website} target="_blank" rel="noreferrer" className="external-btn">
-            🌐 Site Oficial <FaExternalLinkAlt style={{ marginLeft: 4 }} />
-          </a>
+          <a href={game.website} target="_blank" rel="noreferrer" className="external-btn">🌐 Site Oficial <FaExternalLinkAlt style={{ marginLeft: 4 }} /></a>
         )}
-
-        {/* Add / Already added */}
+        {renderSuggested()}
         {isLoggedIn && (
-          added ? (
-            <div className="already-added">✓ Já adicionado ao seu perfil</div>
-          ) : (
+          added ? (<div className="already-added">✓ Já adicionado ao seu perfil</div>) : (
             <button className="add-btn" onClick={async () => {
               try {
                 await api.post('add-game/', { title: game.title, status: 'wishlist' });
@@ -178,11 +185,8 @@ export default function GameDetail() {
               } catch (err) {
                 alert('Erro ao adicionar jogo.');
               }
-            }}>
-              + Adicionar ao perfil
-            </button>
-          )
-        )}
+            }}>+ Adicionar ao perfil</button>
+          ))}
       </section>
     </div>
   );
