@@ -1,0 +1,110 @@
+/* ScreenshotsCarousel.css – visual refinado do carrossel */
+
+.screenshots-section {
+  margin: 2rem 0;
+  padding: 1.2rem;
+  background: var(--bg-soft);
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.screenshots-slider {
+  margin-top: 1rem;
+}
+
+.screenshot-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 500px; 
+}
+
+.screenshot-slide img {
+  max-width: 100%;
+  height: auto;
+  max-height: 500px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.screenshot-slide img:hover {
+  transform: scale(1.015);
+}
+
+.image-modal-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  transform: scale(0.95);
+  opacity: 0;
+  transition: transform 300ms ease, opacity 300ms ease;
+}
+
+.image-modal-content.animate-in {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  color: #fff;
+  background: rgba(0,0,0,0.4);
+  border: none;
+  padding: 0.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+}
+.nav-arrow.left  { left: 1rem; }
+.nav-arrow.right { right: 1rem; }
+.nav-arrow:hover { background: rgba(255,255,255,0.2); }
+
+
+/* Modal de imagem fullscreen */
+.image-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+.image-modal-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  transform: scale(0.95);
+  opacity: 0;
+  transition: transform 300ms ease, opacity 300ms ease;
+}
+
+.image-modal-content img {
+  max-height: 90vh;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+}
+
+.image-modal .close-modal {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  color: #fff;
+  font-size: 1.5rem;
+  border: none;
+  cursor: pointer;
+}
