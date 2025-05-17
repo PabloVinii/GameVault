@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import ReactPlayer from 'react-player';
 import {
   FaWindows,
   FaPlaystation,
@@ -43,6 +44,7 @@ export default function GameDetail() {
   const [suggestedGames, setSuggestedGames] = useState([]);
   const [achievements, setAchievements] = useState([]);
   const [showAllAchievements, setShowAllAchievements] = useState(false);
+  const [trailer, setTrailer] = useState(null);
 
   
   const isLoggedIn = Boolean(localStorage.getItem('access'));
@@ -51,14 +53,16 @@ export default function GameDetail() {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const [gRes, sugRes, achRes] = await Promise.all([
+        const [gRes, sugRes, achRes, trailerRes] = await Promise.all([
           api.get(`game-info/${id}/`),
           api.get(`suggested-games/${id}/`),
           api.get(`game-achievements/${id}/`),
+          api.get(`game-trailer/${id}/`),
         ]);
         setGame(gRes.data);
         setSuggestedGames(sugRes.data);
         setAchievements(achRes.data);
+        setTrailer(trailerRes.data);
 
         if (isLoggedIn) {
           const profRes = await api.get('usergames/');
@@ -102,6 +106,19 @@ export default function GameDetail() {
     );
   };
 
+  const renderTrailer = () => {
+  if (!trailer || !trailer.video_url) return null;
+  return (
+    <section className="trailer-section">
+      <h3>🎬 Trailer Oficial</h3>
+      <div className="trailer-wrapper">
+        <ReactPlayer url={trailer.video_url} controls width="100%" height="100%" />
+      </div>
+    </section>
+  );
+};
+
+
   const renderStores = () => {
     if (!game?.stores?.length) return null;
     return (
@@ -134,7 +151,7 @@ export default function GameDetail() {
       </section>
     );
   };
-
+  
   const renderAchievements = () => {
     if (!achievements.length) return null;
     return (
@@ -254,6 +271,7 @@ export default function GameDetail() {
 
         {renderRatingBars()}
         {renderStores()}
+        {renderTrailer()}
         {renderScreenshots()}
         {renderAchievements()}
         {renderAchievementsModal()}

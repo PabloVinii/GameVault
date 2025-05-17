@@ -164,7 +164,6 @@ class GameInfoView(APIView):
             'released': data.get('released'),
             'metacritic': data.get('metacritic'),
             'tags': data.get('tags', []),
-            'screenshots': data.get('short_screenshots', []),
             'ratings': data.get('ratings', []),
             'developers': data.get('developers', []),
             'publishers': data.get('publishers', []),
@@ -264,4 +263,49 @@ class GameAchievementsView(APIView):
         cache.set(cache_key, achievements, 60 * 60)  # 1 h
         return Response(achievements)
 
+class GameTrailerView(APIView):
+    def get(self, request, rawg_id):
+        cache_key = f"trailer_{rawg_id}"
+        cached = cache.get(cache_key)
+        if cached:
+            return Response(cached)
 
+        url = f"https://api.rawg.io/api/games/{rawg_id}/movies?key={RAWG_API_KEY}"
+        res = requests.get(url)
+
+        if res.status_code != 200:
+            return Response({'error': 'Trailer não disponível'}, status=404)
+
+        data = res.json()
+        results = data.get('results', [])
+        if not results:
+            return Response([])
+
+        trailer = results[0]
+        payload = {
+            'name': trailer.get('name'),
+            'preview': trailer.get('preview'),
+            'video_url': trailer.get('data', {}).get('max'),
+        }
+
+        cache.set(cache_key, payload, 60 * 60)
+        return Response(payload)
+
+
+class GameScreenshotsView(APIView):
+    def get(self, request, rawg_id):
+        cache_key = f"screenshots_{rawg_id}"
+        cached = cache.get(cache_key)
+        if cached:
+            return Response(cached)
+
+        url = f"https://api.rawg.io/api/games/{rawg_id}/screenshots?key={RAWG_API_KEY}"
+        res = requests.get(url)
+        if res.status_code != 200:
+            return Response([], status=404)
+
+        data = res.json()
+        screenshots = [{"id": sc["id"], "image": sc["image"]} for sc in data.get("results", [])]
+
+        cache.set(cache_key, screenshots, 60 * 60)
+        return Response(screenshots)
