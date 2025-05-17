@@ -1,72 +1,68 @@
-// ... (imports e configs mantidos)
+// GameDetail.jsx – coordenador das seções detalhadas do jogo
+// -----------------------------------------------------------
 import { useEffect, useState } from 'react';
-import { FaTimes } from 'react-icons/fa';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import ReactPlayer from 'react-player';
-import {
-  FaWindows,
-  FaPlaystation,
-  FaXbox,
-  FaMobileAlt,
-  FaApple,
-  FaExternalLinkAlt,
-  FaArrowLeft,
-} from 'react-icons/fa';
-import {
-  SiNintendo,
-  SiLinux,
-  SiSteam,
-  SiEpicgames,
-  SiGogdotcom,
-} from 'react-icons/si';
+import { useParams, useNavigate } from 'react-router-dom';
 
+// Seções modularizadas
+import HeroHeader from './GameDetail/HeroHeader';
+import RatingBreakdown from './GameDetail/RatingBreakdown';
+import StoreButtons from './GameDetail/StoreButtons';
+import TrailerSection from './GameDetail/TrailerSection';
+import ScreenshotsCarousel from './GameDetail/ScreenshotsCarousel';
+import AchievementsSection from './GameDetail/AchievementsSection';
+import AchievementsModal from './GameDetail/AchievementsModal';
+import SuggestedGrid from './GameDetail/SuggestedGrid';
+
+// UI genérica
 import Navbar from '../components/Navbar';
 import Spinner from '../components/Spinner';
 import api from '../api/api';
 import './styles/GameDetail.css';
 
-const platformIconMap = {
-  pc: <FaWindows title="PC" />, playstation: <FaPlaystation title="PlayStation" />, xbox: <FaXbox title="Xbox" />,
-  nintendo: <SiNintendo title="Nintendo" />, android: <FaMobileAlt title="Android" />, ios: <FaApple title="iOS" />,
-  mac: <FaApple title="Mac" />, linux: <SiLinux title="Linux" />,
-};
-const storeIconMap = {
-  steam: <SiSteam />, epic: <SiEpicgames />, gog: <SiGogdotcom />,
-};
-
 export default function GameDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // --- STATE --------------------------------------------------------------
   const [game, setGame] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [added, setAdded] = useState(false);
-  const [suggestedGames, setSuggestedGames] = useState([]);
+  const [screens, setScreens] = useState([]);
   const [achievements, setAchievements] = useState([]);
-  const [showAllAchievements, setShowAllAchievements] = useState(false);
+  const [suggestedGames, setSuggestedGames] = useState([]);
   const [trailer, setTrailer] = useState(null);
+  const [showAchModal, setShowAchModal] = useState(false);
+  const [added, setAdded] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  
   const isLoggedIn = Boolean(localStorage.getItem('access'));
 
+  // --- DATA FETCH --------------------------------------------------------
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const [gRes, sugRes, achRes, trailerRes] = await Promise.all([
+        const [
+          gameRes,          // detalhes
+          screenshotsRes,   // screenshots
+          suggestedRes,     // recomendados
+          achievementsRes,  // conquistas
+          trailerRes        // trailer
+        ] = await Promise.all([
           api.get(`game-info/${id}/`),
+          api.get(`game-screenshots/${id}/`),
           api.get(`suggested-games/${id}/`),
           api.get(`game-achievements/${id}/`),
           api.get(`game-trailer/${id}/`),
         ]);
-        setGame(gRes.data);
-        setSuggestedGames(sugRes.data);
-        setAchievements(achRes.data);
+
+        setGame(gameRes.data);
+        setScreens(screenshotsRes.data);
+        setSuggestedGames(suggestedRes.data);
+        setAchievements(achievementsRes.data);
         setTrailer(trailerRes.data);
 
         if (isLoggedIn) {
-          const profRes = await api.get('usergames/');
-          const exists = profRes.data.some((ug) => ug.game.rawg_id === parseInt(id));
+          const prof = await api.get('usergames/');
+          const exists = prof.data.some((ug) => ug.game.rawg_id === Number(id));
           setAdded(exists);
         }
       } catch (err) {
@@ -80,171 +76,30 @@ export default function GameDetail() {
     window.scrollTo(0, 0);
   }, [id, isLoggedIn]);
 
+  // --- HELPERS -----------------------------------------------------------
   const renderPlatforms = () => {
     if (!game?.platform) return null;
-    const uniques = [...new Set(game.platform.split(',').map((p) => p.trim().toLowerCase()))];
-    return uniques.map((key) => {
-      const matched = Object.keys(platformIconMap).find((slug) => key.includes(slug));
-      return matched ? (
-        <span key={matched} className="platform-icon">{platformIconMap[matched]}</span>
-      ) : null;
-    });
+    const icons = game.platform.split(',').map((p) => p.trim());
+    return icons.map((text) => <span key={text} className="platform-icon">{text}</span>);
   };
 
-  const renderRatingBars = () => {
-    if (!game?.ratings?.length) return null;
-    return (
-      <div className="rating-breakdown">
-        {game.ratings.map((r) => (
-          <div key={r.id} className="rating-row">
-            <span className="r-title">{r.title}</span>
-            <div className="r-bar"><div style={{ width: `${r.percent}%` }} /></div>
-            <span className="r-percent">{r.percent.toFixed(0)}%</span>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const renderTrailer = () => {
-  if (!trailer || !trailer.video_url) return null;
-  return (
-    <section className="trailer-section">
-      <h3>🎬 Trailer Oficial</h3>
-      <div className="trailer-wrapper">
-        <ReactPlayer url={trailer.video_url} controls width="100%" height="100%" />
-      </div>
-    </section>
-  );
-};
-
-
-  const renderStores = () => {
-    if (!game?.stores?.length) return null;
-    return (
-      <div className="stores-wrapper">
-        {game.stores.map(({ store }, idx) => {
-          const name = store.name;
-          const domain = store.domain ? `https://${store.domain}` : '#';
-          const iconKey = Object.keys(storeIconMap).find((k) => name.toLowerCase().includes(k));
-          return (
-            <a key={idx} href={domain} target="_blank" rel="noreferrer" className="store-btn">
-              {iconKey && <span className="s-icon">{storeIconMap[iconKey]}</span>}
-              {name} <FaExternalLinkAlt style={{ marginLeft: 4, fontSize: '.75rem' }} />
-            </a>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const renderScreenshots = () => {
-    if (!game?.screenshots?.length) return null;
-    return (
-      <section className="screenshots-section">
-        <h3>Screenshots</h3>
-        <div className="screenshots-grid">
-          {game.screenshots.map((sc) => (
-            <img key={sc.id} src={sc.image} alt={`${game.title} screenshot`} />
-          ))}
-        </div>
-      </section>
-    );
-  };
-  
-  const renderAchievements = () => {
-    if (!achievements.length) return null;
-    return (
-      <section className="achievements-section">
-        <h3>🏆 Conquistas Steam</h3>
-        <div className="achievements-grid">
-          {achievements.slice(0, 6).map((a) => (
-            <div key={a.id} className="achievement-card">
-              <img src={a.image} alt={a.name} />
-              <div>
-                <strong>{a.name}</strong>
-                <p>{a.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-        <button className="view-all-btn" onClick={() => setShowAllAchievements(true)}>
-          Ver todas as conquistas
-        </button>
-      </section>
-    );
-  };
-
-  const renderAchievementsModal = () => {
-    if (!showAllAchievements) return null;
-    return (
-      <div className="achievements-modal">
-        <div className="modal-content">
-          <button className="close-modal" onClick={() => setShowAllAchievements(false)}>
-            <FaTimes />
-          </button>
-          <h2>🏆 Todas as Conquistas</h2>
-          <div className="modal-achievements-grid">
-            {achievements.map((a) => (
-              <div key={a.id} className="achievement-card">
-                <img src={a.image} alt={a.name} />
-                <div>
-                  <strong>{a.name}</strong>
-                  <p>{a.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderSuggested = () => {
-    if (!suggestedGames.length) return null;
-    return (
-      <section className="suggested-section">
-        <h3>Você pode gostar de…</h3>
-        <div className="suggested-grid">
-          {suggestedGames.map((g) => (
-            <Link key={g.rawg_id} to={`/game/${g.rawg_id}`} className="suggested-card">
-              <img src={g.cover_url} alt={g.title} />
-              <p>{g.title}</p>
-              <span>⭐ {g.rating}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-    );
-  };
-
+  // --- RENDER ------------------------------------------------------------
   if (loading) return <Spinner label="Carregando detalhes…" />;
-  if (!game) return <div className="game-detail-error">Jogo não encontrado.</div>;
+  if (!game)   return <div className="game-detail-error">Jogo não encontrado.</div>;
 
   return (
     <div className="game-detail-page">
       <Navbar />
-      <header
-        className="game-hero"
-        style={{ backgroundImage: `url(${game.background_image || game.cover_url})` }}
-      >
-        <div className="hero-overlay">
-          <button className="back-btn" onClick={() => navigate(-1)}>
-            <FaArrowLeft /> Voltar
-          </button>
-          <div className="hero-content">
-            <h1>{game.title}</h1>
-            <div className="game-meta">
-              {game.released && <span className="badge">{game.released}</span>}
-              {game.metacritic && <span className="badge metacritic">Meta {game.metacritic}</span>}
-              <span className="badge">⭐ {game.rating}</span>
-            </div>
-            <div className="platform-icons">{renderPlatforms()}</div>
-          </div>
-        </div>
-      </header>
+
+      {/* HERO */}
+      <HeroHeader
+        game={game}
+        platformIcons={renderPlatforms()}
+        onBack={() => navigate(-1)}
+      />
 
       <main className="game-info">
+        {/* SOBRE */}
         {game.description && (
           <section className="description-section">
             <h3>Sobre</h3>
@@ -261,6 +116,7 @@ export default function GameDetail() {
           </section>
         )}
 
+        {/* TAGS */}
         {game.tags?.length > 0 && (
           <section className="tags-section">
             {game.tags.slice(0, 15).map((t) => (
@@ -269,16 +125,27 @@ export default function GameDetail() {
           </section>
         )}
 
-        {renderRatingBars()}
-        {renderStores()}
-        {renderTrailer()}
-        {renderScreenshots()}
-        {renderAchievements()}
-        {renderAchievementsModal()}
+        {/* RATING, LOJAS, TRAILER, SCREENSHOTS */}
+        <RatingBreakdown ratings={game.ratings} />
+        <StoreButtons stores={game.stores} />
+        <TrailerSection videoUrl={trailer?.video_url} />
+        <ScreenshotsCarousel screenshots={screens} />
 
+        {/* CONQUISTAS */}
+        <AchievementsSection
+          achievements={achievements}
+          onOpenModal={() => setShowAchModal(true)}
+        />
+        <AchievementsModal
+          isOpen={showAchModal}
+          onClose={() => setShowAchModal(false)}
+          achievements={achievements}
+        />
+
+        {/* SITE + PERFIL */}
         {game.website && (
           <a href={game.website} target="_blank" rel="noreferrer" className="external-btn">
-            🌐 Site Oficial <FaExternalLinkAlt style={{ marginLeft: 4 }} />
+            🌐 Site Oficial
           </a>
         )}
 
@@ -290,12 +157,9 @@ export default function GameDetail() {
               className="add-btn"
               onClick={async () => {
                 try {
-                  await api.post('add-game/', {
-                    title: game.title,
-                    status: 'wishlist',
-                  });
+                  await api.post('add-game/', { title: game.title, status: 'wishlist' });
                   setAdded(true);
-                } catch (err) {
+                } catch {
                   alert('Erro ao adicionar jogo.');
                 }
               }}
@@ -305,7 +169,8 @@ export default function GameDetail() {
           )
         )}
 
-        {renderSuggested()}
+        {/* RECOMENDADOS */}
+        <SuggestedGrid suggested={suggestedGames} />
       </main>
     </div>
   );
