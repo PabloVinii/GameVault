@@ -129,7 +129,9 @@ export default function Dashboard() {
                   showReview={true}
                   userGameData={ug}
                   onEdit={() => setEditingUG(ug)}
+                  variant="dashboard"
                 />
+                
               </Link>
             ))}
           </div>
