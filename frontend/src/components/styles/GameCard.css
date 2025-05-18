@@ -59,3 +59,36 @@ small { color: var(--muted); }
   transition: background .2s;
 }
 .game-card-button:hover { background: var(--primary-hover); }
+
+/* botão de edição (ícone redondo) */
+.edit-review-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;          
+  height: 2.2rem;
+  border-radius: 50%;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-size: 1.05rem;     
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  margin-top: .6rem;      
+}
+
+.edit-review-btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+.edit-review-btn:disabled {
+  opacity: .6;
+  cursor: default;
+}
+
+.edit-review-btn svg {
+  width: 1rem;
+  height: 1rem;
+  color: white; 
+}

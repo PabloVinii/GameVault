@@ -1,5 +1,6 @@
-import { FaWindows, FaPlaystation, FaXbox, FaMobileAlt, FaApple, FaPen } from 'react-icons/fa';
+import { FaWindows, FaPlaystation, FaXbox, FaMobileAlt, FaApple, } from 'react-icons/fa';
 import { SiNintendo, SiLinux } from 'react-icons/si';
+
 import './styles/GameCard.css';
 
 const platformIconMap = {
@@ -58,19 +59,18 @@ export default function GameCard({ game, added = false, onAddClick, showReview =
             {userGameData.review && (
               <p className="game-card-review-text">“{userGameData.review}”</p>
             )}
-            {onEdit && (
-              <button
-                className="edit-review-btn"
-                onClick={(e) => {
-                  e.preventDefault(); // impede o link
-                  e.stopPropagation(); // impede propagação para o card
-                  onEdit();
-                }}
-                title="Editar"
-              >
-                <FaPen style={{ marginRight: '6px' }} /> Editar
-              </button>
-            )}
+            <button
+              className="edit-review-btn"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onEdit();
+              }}
+              title="Editar"
+              aria-label="Editar"
+            >
+              E
+            </button>
           </div>
         )}
       </div>
