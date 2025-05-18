@@ -161,3 +161,20 @@ small { color: var(--muted); }
 .review-snippet > * {
   white-space: nowrap;
 }
+
+.delete-review-btn {
+  margin-top: 0.4rem;
+  background: #3a0000;
+  border: none;
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 1.8rem;
+  height: 1.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.delete-review-btn:hover {
+  background: #800000;
+}

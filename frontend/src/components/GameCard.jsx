@@ -5,6 +5,9 @@ import {
   FaMobileAlt,
   FaApple,
 } from 'react-icons/fa';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
+import './styles/ConfirmAlert.css';
 import { SiNintendo, SiLinux } from 'react-icons/si';
 import './styles/GameCard.css';
 
@@ -26,6 +29,7 @@ export default function GameCard({
   showReview = false,
   userGameData = {},
   onEdit,
+  onDelete,
   variant = "default", // "default" (Home) ou "dashboard"
 }) {
   const isDashboard = variant === "dashboard";
@@ -114,6 +118,30 @@ export default function GameCard({
             </div>
           )
         )}
+        <button
+          className="delete-review-btn"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            confirmAlert({
+              title: 'Remover jogo',
+              message: 'Tem certeza que deseja remover este jogo do seu perfil?',
+              buttons: [
+                {
+                  label: 'Sim',
+                  onClick: () => onDelete(),
+                },
+                {
+                  label: 'Cancelar',
+                },
+              ],
+            });
+          }}
+        title="Remover"
+        aria-label="Remover"
+      >
+        ×
+      </button>
       </div>
     </div>
   );

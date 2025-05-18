@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { toast } from 'react-toastify';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 import { Link } from 'react-router-dom';
 import api from '../api/api';
 import Navbar from '../components/Navbar';
@@ -63,7 +65,7 @@ export default function Dashboard() {
   }, []);
 
   /**
-   * Memoise derived stats to não recalcular toda renderização
+   * Memoise derived stats
    */
   const stats = useMemo(() => {
     const total = games.length;
@@ -76,12 +78,28 @@ export default function Dashboard() {
   }, [games]);
 
   /**
-   * Filtra jogos conforme tab selecionada
+   * Lista de jogos visível considerando a aba selecionada (recalcula a cada render necessário).
    */
-  const visibleGames = useMemo(() => {
-    if (selectedTab === 'all') return games;
-    return games.filter((ug) => ug.status === selectedTab);
-  }, [games, selectedTab]);
+  const visibleGames = selectedTab === 'all'
+    ? games
+    : games.filter((ug) => ug.status === selectedTab);
+
+  const handleDelete = async (userGameId) => {
+    try {
+      await api.delete(`/usergames/${userGameId}/`);
+      toast.success('Jogo removido com sucesso!', { delay: 300 });
+      setGames((prev) => prev.filter((g) => g.id !== userGameId));
+    } catch (err) {
+      if (err.response?.status !== 204) {
+        toast.error('Erro ao remover jogo.');
+        console.error(err);
+        return;
+      }
+      // mesmo se cair aqui por status 204, ainda removemos
+      toast.success('Jogo removido com sucesso!', { delay: 300 });
+      setGames((prev) => prev.filter((g) => g.id !== userGameId));
+    }
+  };
 
   return (
     <div className="profile-page">
@@ -129,22 +147,21 @@ export default function Dashboard() {
                   showReview={true}
                   userGameData={ug}
                   onEdit={() => setEditingUG(ug)}
+                  onDelete={() => handleDelete(ug.id)}
                   variant="dashboard"
                 />
-                
               </Link>
             ))}
           </div>
         )}
       </main>
+
       {editingUG && (
         <EditGameModal
           userGame={editingUG}
           onClose={() => setEditingUG(null)}
           onUpdated={(updated) => {
-            setGames((prev) =>
-              prev.map((ug) => (ug.id === updated.id ? updated : ug))
-            );
+            setGames((prev) => prev.map((ug) => (ug.id === updated.id ? updated : ug)));
             setEditingUG(null);
           }}
         />
