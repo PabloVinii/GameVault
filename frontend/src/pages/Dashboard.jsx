@@ -4,6 +4,7 @@ import api from '../api/api';
 import Navbar from '../components/Navbar';
 import GameCard from '../components/GameCard';
 import './styles/Profile.css';
+import EditGameModal from '../components/EditGameModal';
 
 /**
  * Small reusable card to display numeric stats
@@ -22,6 +23,7 @@ export default function Dashboard() {
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [selectedTab, setSelectedTab] = useState('all'); // all | played | playing | wishlist
+  const [editingUG, setEditingUG] = useState(null);
 
   /**
    * Fetches user games
@@ -126,12 +128,25 @@ export default function Dashboard() {
                   game={ug.game}
                   showReview={true}
                   userGameData={ug}
+                  onEdit={() => setEditingUG(ug)}
                 />
               </Link>
             ))}
           </div>
         )}
       </main>
+      {editingUG && (
+        <EditGameModal
+          userGame={editingUG}
+          onClose={() => setEditingUG(null)}
+          onUpdated={(updated) => {
+            setGames((prev) =>
+              prev.map((ug) => (ug.id === updated.id ? updated : ug))
+            );
+            setEditingUG(null);
+          }}
+        />
+      )}
     </div>
   );
 }

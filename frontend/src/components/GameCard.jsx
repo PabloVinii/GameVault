@@ -1,4 +1,4 @@
-import { FaWindows, FaPlaystation, FaXbox, FaMobileAlt, FaApple } from 'react-icons/fa';
+import { FaWindows, FaPlaystation, FaXbox, FaMobileAlt, FaApple, FaPen } from 'react-icons/fa';
 import { SiNintendo, SiLinux } from 'react-icons/si';
 import './styles/GameCard.css';
 
@@ -13,7 +13,7 @@ const platformIconMap = {
   linux: <SiLinux title="Linux" />,
 };
 
-export default function GameCard({ game, added = false, onAddClick, showReview = false, userGameData = {} }) {
+export default function GameCard({ game, added = false, onAddClick, showReview = false, userGameData = {}, onEdit }) {
   const renderPlatformIcons = () => {
     if (!game.platform) return null;
     const raw = Array.isArray(game.platform) ? game.platform : game.platform.split(',');
@@ -51,13 +51,25 @@ export default function GameCard({ game, added = false, onAddClick, showReview =
           )
         )}
 
-
         {showReview && userGameData.status && (
           <div className="game-card-review">
             <p><strong>Status:</strong> {userGameData.status}</p>
             <p><strong>Nota:</strong> {userGameData.rating || '—'}</p>
             {userGameData.review && (
               <p className="game-card-review-text">“{userGameData.review}”</p>
+            )}
+            {onEdit && (
+              <button
+                className="edit-review-btn"
+                onClick={(e) => {
+                  e.preventDefault(); // impede o link
+                  e.stopPropagation(); // impede propagação para o card
+                  onEdit();
+                }}
+                title="Editar"
+              >
+                <FaPen style={{ marginRight: '6px' }} /> Editar
+              </button>
             )}
           </div>
         )}
